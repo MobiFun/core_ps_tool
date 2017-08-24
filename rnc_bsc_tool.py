@@ -721,7 +721,7 @@ def fulfill_rnc_info(rnc_worksheet, fallback, rnc_info, fallback_empty_row):
                                                               DET=rnc_info.get('DET'),
                                                               Share_Type='LOADSHARE',
                                                               RNC_Name=rnc_info.get('RNC Name'),
-                                                              SLSM=slsm_map.get(rnc_info.get('SLSM')))
+                                                              SLSM=slsm_map.get(int(rnc_info.get('SLSM'))))
     # Configure M3UA Signaling Routes
     empty_row = rnc_worksheet.max_row + 2
     rnc_worksheet['A{}'.format(empty_row)] = '/* 3 - Add M3UA signaling routes */'

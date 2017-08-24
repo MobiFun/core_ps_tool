@@ -1,6 +1,6 @@
 # coding=utf-8
 #####################################################
-#                    Versao 4                       #
+#                    Versao 4.1                     #
 #                                                   #
 #                 Data 30-01-2017                   #
 #                                                   #
@@ -36,17 +36,17 @@ def flush_dns_configuration(b, view_name, naptr_records, naptr_records_delete, a
         {"service": "x-3gpp-mme:x-gn:x-s10",
         "domain_name": "tac-lb25.tac-hb8E.tac.epc.mnc004.mcc724.3gppnetwork.org.",
         "flags": "a", "preference": 10,
-        "ttl": 300, "regexp": "''", "order": 10,
+        "ttl": 300, "regexp": "\"\"", "order": 10,
         "replacement": "topoff.vip-gn.DMBSA1.node.epc.mnc004.mcc724.3gppnetwork.org."},
 
         {"service": "x-3gpp-mme:x-gn:x-s10",
         "domain_name": "tac-lb25.tac-hb8E.tac.epc.mnc004.mcc724.3gppnetwork.org.",
-        "flags": "a", "preference": 10, "ttl": 300, "regexp": "''", "order": 10,
+        "flags": "a", "preference": 10, "ttl": 300, "regexp": "\"\"", "order": 10,
         "replacement": "topoff.vip-gn.DMCTA1.node.epc.mnc004.mcc724.3gppnetwork.org."},
 
         {"service": "x-3gpp-sgw:x-s11:x-s5-gtp",
         "domain_name": "tac-lb1A.tac-hb7A.tac.epc.mnc004.mcc724.3gppnetwork.org.",
-        "flags": "a", "preference": 10, "ttl": 300, "regexp": "''", "order": 10,
+        "flags": "a", "preference": 10, "ttl": 300, "regexp": "\"\"", "order": 10,
         "replacement": "topoff.vip-s11.GPCTA1.node.epc.mnc004.mcc724.3gppnetwork.org."}
 
         The objects inside a_records / a_records_delete looks like this:
@@ -263,15 +263,15 @@ def evolved_extract_records(arquivo_input):
         {"action": "add", service": "x-3gpp-mme:x-gn:x-s10",
         "domain_name": "tac-lb25.tac-hb8E.tac.epc.mnc004.mcc724.3gppnetwork.org.",
         "flags": "a", "preference": 10,
-        "ttl": 300, "regexp": "''", "order": 10,
+        "ttl": 300, "regexp": "\"\"", "order": 10,
         "replacement": "topoff.vip-gn.DMBSA1.node.epc.mnc004.mcc724.3gppnetwork.org."},
         {"action": "add", "service": "x-3gpp-mme:x-gn:x-s10",
         "domain_name": "tac-lb25.tac-hb8E.tac.epc.mnc004.mcc724.3gppnetwork.org.",
-        "flags": "a", "preference": 10, "ttl": 300, "regexp": "''", "order": 10,
+        "flags": "a", "preference": 10, "ttl": 300, "regexp": "\"\"", "order": 10,
         "replacement": "topoff.vip-gn.DMCTA1.node.epc.mnc004.mcc724.3gppnetwork.org."},
         {"action": "remove", "service": "x-3gpp-sgw:x-s11:x-s5-gtp",
         "domain_name": "tac-lb1A.tac-hb7A.tac.epc.mnc004.mcc724.3gppnetwork.org.",
-        "flags": "a", "preference": 10, "ttl": 300, "regexp": "''", "order": 10,
+        "flags": "a", "preference": 10, "ttl": 300, "regexp": "\"\"", "order": 10,
         "replacement": "topoff.vip-s11.GPCTA1.node.epc.mnc004.mcc724.3gppnetwork.org."}
         {"action": "add", "domain_name":"testp.tim.br.mnc003.mcc724.gprs.", "ip_address": "10.221.58.214", "ttl":300}
         {"action": "add", "domain_name":"testp.tim.br.mnc004.mcc724.gprs.", "ip_address": "10.221.58.214", "ttl":300}

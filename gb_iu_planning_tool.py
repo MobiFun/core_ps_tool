@@ -186,59 +186,59 @@ def extract_rnc_info(file_input):
                 rnc_info['DPC'] = find_between(line, 'DPC="0x', '",').upper()
                 rnc_info['DET'] = 'IPSP'
                 rnc_info['RNCN'] = find_between(line, 'DEN="', '";')
-                for line0 in line_collection:
-                    line0.strip()
-                    if line0.startswith('ADD M3LKS:'):
-                        if rnc_info.get('RNCN') == find_between(line0, 'LSN="', '";'):
-                            rnc_info['LSX'] = find_between(line0, 'LSX=', ',')
-                            rnc_info['SLSM'] = find_between(line0, 'SLSM=', ',')
-                            rnc_info['TM'] = find_between(line0, 'TM=', ',')
-                    elif line0.startswith('ADD M3RT:'):
-                        if rnc_info.get('RNCN') == find_between(line0, 'RTN="', '";'):
-                            rnc_info['RTX'] = find_between(line0, 'RTX=', ',')
-                    elif line0.startswith('ADD M3LNK:'):
-                        if rnc_info.get('RNCN') in find_between(line0, 'LKN="', '";'):
+                for nextline in line_collection:
+                    nextline.strip()
+                    if nextline.startswith('ADD M3LKS:'):
+                        if rnc_info.get('RNCN') == find_between(nextline, 'LSN="', '";'):
+                            rnc_info['LSX'] = find_between(nextline, 'LSX=', ',')
+                            rnc_info['SLSM'] = find_between(nextline, 'SLSM=', ',')
+                            rnc_info['TM'] = find_between(nextline, 'TM=', ',')
+                    elif nextline.startswith('ADD M3RT:'):
+                        if rnc_info.get('RNCN') == find_between(nextline, 'RTN="', '";'):
+                            rnc_info['RTX'] = find_between(nextline, 'RTX=', ',')
+                    elif nextline.startswith('ADD M3LNK:'):
+                        if rnc_info.get('RNCN') in find_between(nextline, 'LKN="', '";'):
                             m3_lnk.append(
-                                {'SRN': find_between(line0, 'SRN=', ','),
-                                 'SN': find_between(line0, 'SN=', ','),
-                                 'LNK': find_between(line0, 'LNK=', ','),
-                                 'LOCIPV41': find_between(line0, 'LOCIPV41="', '",'),
-                                 'LOCIPV42': find_between(line0, 'LOCIPV42="', '",'),
-                                 'LOCPORT': find_between(line0, 'LOCPORT=', ','),
-                                 'PEERIPV41': find_between(line0, 'PEERIPV41="', '",'),
-                                 'PEERIPV42': find_between(line0, 'PEERIPV42="', '",'),
-                                 'PEERPORT': find_between(line0, 'PEERPORT=', ','),
-                                 'SCTPINDX': find_between(line0, 'SCTPINDX=', ',')
+                                {'SRN': find_between(nextline, 'SRN=', ','),
+                                 'SN': find_between(nextline, 'SN=', ','),
+                                 'LNK': find_between(nextline, 'LNK=', ','),
+                                 'LOCIPV41': find_between(nextline, 'LOCIPV41="', '",'),
+                                 'LOCIPV42': find_between(nextline, 'LOCIPV42="', '",'),
+                                 'LOCPORT': find_between(nextline, 'LOCPORT=', ','),
+                                 'PEERIPV41': find_between(nextline, 'PEERIPV41="', '",'),
+                                 'PEERIPV42': find_between(nextline, 'PEERIPV42="', '",'),
+                                 'PEERPORT': find_between(nextline, 'PEERPORT=', ','),
+                                 'SCTPINDX': find_between(nextline, 'SCTPINDX=', ',')
                                  }
                             )
                             rnc_info['M3LNK'] = m3_lnk
-                    elif line0.startswith('ADD SCCPDPC:'):
-                        if rnc_info.get('RNCN') == find_between(line0, 'DPN="', '";'):
-                            rnc_info['DPX'] = find_between(line0, 'DPX=', ',')
-                    elif line0.startswith('ADD SCCPSSN:'):
-                        if rnc_info.get('RNCN') == find_between(line0, 'SSNNAME="', '",'):
-                            if find_between(line0, 'SSN=', ',') == 'RANAP':
-                                rnc_info['SSNX_RANAP'] = find_between(line0, 'SSNX=', ',')
-                            elif find_between(line0, 'SSN=', ',') == 'SCMG':
-                                rnc_info['SSNX_SCMG'] = find_between(line0, 'SSNX=', ',')
-                    elif line0.startswith('ADD RNC:'):
-                        if rnc_info.get('RNCN') == find_between(line0, 'RNCN="', '",'):
-                            rnc_info['RNCX'] = find_between(line0, 'RNCX=', ',')
-                            rnc_info['RNCMCC'] = find_between(line0, 'RNCMCC="', '",')
-                            rnc_info['RNCMNC'] = find_between(line0, 'RNCMNC="', '",')
-                            rnc_info['RNCID'] = find_between(line0, 'RNCID=', ',')
-                            rnc_info['NI'] = find_between(line0, 'NI=', ',')
-                            rnc_info['SPC'] = find_between(line0, 'SPC="0x', '",').upper()
-                            rnc_info['CNID'] = find_between(line0, 'CNID=', ',')
-                            rnc_info['IMS'] = find_between(line0, 'IMS=', ',')
-                            rnc_info['IU-FLEX'] = find_between(line0, 'IU-FLEX=', ',')
-                            rnc_info['RABQOS'] = find_between(line0, 'RABQOS=', ',')
-                    elif line0.startswith('ADD IUPAGING:'):
-                        if rnc_info.get('RNCX') == find_between(line0, 'RNCINDEX=', ';'):
+                    elif nextline.startswith('ADD SCCPDPC:'):
+                        if rnc_info.get('RNCN') == find_between(nextline, 'DPN="', '";'):
+                            rnc_info['DPX'] = find_between(nextline, 'DPX=', ',')
+                    elif nextline.startswith('ADD SCCPSSN:'):
+                        if rnc_info.get('RNCN') == find_between(nextline, 'SSNNAME="', '",'):
+                            if find_between(nextline, 'SSN=', ',') == 'RANAP':
+                                rnc_info['SSNX_RANAP'] = find_between(nextline, 'SSNX=', ',')
+                            elif find_between(nextline, 'SSN=', ',') == 'SCMG':
+                                rnc_info['SSNX_SCMG'] = find_between(nextline, 'SSNX=', ',')
+                    elif nextline.startswith('ADD RNC:'):
+                        if rnc_info.get('RNCN') == find_between(nextline, 'RNCN="', '",'):
+                            rnc_info['RNCX'] = find_between(nextline, 'RNCX=', ',')
+                            rnc_info['RNCMCC'] = find_between(nextline, 'RNCMCC="', '",')
+                            rnc_info['RNCMNC'] = find_between(nextline, 'RNCMNC="', '",')
+                            rnc_info['RNCID'] = find_between(nextline, 'RNCID=', ',')
+                            rnc_info['NI'] = find_between(nextline, 'NI=', ',')
+                            rnc_info['SPC'] = find_between(nextline, 'SPC="0x', '",').upper()
+                            rnc_info['CNID'] = find_between(nextline, 'CNID=', ',')
+                            rnc_info['IMS'] = find_between(nextline, 'IMS=', ',')
+                            rnc_info['IU-FLEX'] = find_between(nextline, 'IU-FLEX=', ',')
+                            rnc_info['RABQOS'] = find_between(nextline, 'RABQOS=', ',')
+                    elif nextline.startswith('ADD IUPAGING:'):
+                        if rnc_info.get('RNCX') == find_between(nextline, 'RNCINDEX=', ';'):
                             plmn = rnc_info.get('RNCMCC') + rnc_info.get('RNCMNC')
                             lai.append(
-                                {'LAC': str(int(find_between(line0, 'LAI="{}'.format(plmn), '",'), 16)),
-                                 'RAC': str(int(find_between(line0, 'RAC="0x', '",'), 16))}
+                                {'LAC': str(int(find_between(nextline, 'LAI="{}'.format(plmn), '",'), 16)),
+                                 'RAC': str(int(find_between(nextline, 'RAC="0x', '",'), 16))}
                             )
                             rnc_info['LAI'] = lai
         if rnc_info:
@@ -330,7 +330,7 @@ def extract_bsc_info(lai_bsc_file, file_input):
                                 'NSEI'):
                             local_endpoint.append(
                                 {'SN': find_between(line0, 'SN=', ','),
-                                 'SRN': find_between(line0, 'SRN', ','),
+                                 'SRN': find_between(line0, 'SRN=', ','),
                                  'LIPV4': find_between(line0, 'LIPV4="', '",'),
                                  'LUP': find_between(line0, 'LUP=', ',')
                                  }
@@ -384,7 +384,7 @@ def extract_bsc_info(lai_bsc_file, file_input):
                                     'NSEI'):
                                 local_endpoint.append(
                                     {'SN': find_between(line0, 'SN=', ','),
-                                     'SRN': find_between(line0, 'SRN', ','),
+                                     'SRN': find_between(line0, 'SRN=', ','),
                                      'LIPV4': find_between(line0, 'LIPV4="', '",'),
                                      'LUP': find_between(line0, 'LUP=', ',')
                                      }
