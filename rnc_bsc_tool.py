@@ -644,8 +644,10 @@ def create_rnc_project(workbook_destination_path, user_name, rnc_data, file_inpu
 
 
 def create_rnc_workbook(rnc_data, full_path):
+    date = datetime.datetime.now()
     destination_path = os.path.join(full_path,
-                                    'Projeto Integracao RNC_{}.xlsx'.format(rnc_data.get('RNC Name'))
+                                    'Projeto Integracao RNC_{}_{}.xlsx'.format(rnc_data.get('RNC Name'),
+                                                                               date.strftime('%d%m%Y'))
                                     )
     if not os.path.exists(destination_path):
         base_folder = os.path.abspath(os.getcwd())
@@ -970,8 +972,11 @@ def fulfill_dns_info(workbook, ne_info, dns_sheet_empty_row, fallback_dns_sheet_
 
 
 def create_bsc_workbook(bsc_data, full_path):
+    date = datetime.datetime.now()
+
     destination_path = os.path.join(full_path,
-                                    'Projeto Integracao BSC_{}.xlsx'.format(bsc_data.get('BSC Name'))
+                                    'Projeto Integracao BSC_{}_{}.xlsx'.format(bsc_data.get('BSC Name'),
+                                                                               date.strftime('%d%m%Y'))
                                     )
     if not os.path.exists(destination_path):
         base_folder = os.path.abspath(os.getcwd())
@@ -1186,16 +1191,21 @@ def srvcc_dns_entries_f5(ne_info, expansion):
 
 
 def export_f5_entries(ne_info, full_path, entries_list):
+    date = datetime.datetime.now()
+    date_string = '{}'.format(date.strftime('%d%m%Y'))
     ne_name = ne_info.get('RNC Name')
-    destination_path = os.path.join(full_path, 'Projeto Integracao RNC_{}.txt'.format(ne_name)
+    destination_path = os.path.join(full_path, 'Projeto Integracao RNC_{}_{}.txt'.format(ne_name, date_string)
                                     )
-    fallback_destination_path = os.path.join(full_path, 'FALLBACK_Projeto Integracao RNC_{}.txt'.format(ne_name)
+    fallback_destination_path = os.path.join(full_path, 'FALLBACK_Projeto Integracao RNC_{}_{}.txt'.format(ne_name,
+                                                                                                           date_string)
                                              )
     if not ne_name:
         ne_name = ne_info.get('BSC Name')
-        destination_path = os.path.join(full_path, 'Projeto Integracao BSC_{}.txt'.format(ne_name)
+        destination_path = os.path.join(full_path, 'Projeto Integracao BSC_{}_{}.txt'.format(ne_name, date_string)
                                         )
-        fallback_destination_path = os.path.join(full_path, 'FALLBACK_Projeto Integracao BSC_{}.txt'.format(ne_name)
+        fallback_destination_path = os.path.join(full_path,
+                                                 'FALLBACK_Projeto Integracao BSC_{}_{}.txt'.format(ne_name,
+                                                                                                    date_string)
                                                  )
 
     with open(destination_path, 'wb') as export:
