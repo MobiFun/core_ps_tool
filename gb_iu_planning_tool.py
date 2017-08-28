@@ -365,7 +365,7 @@ def extract_bsc_info(lai_bsc_file, file_input):
                     bsc_info['GB-FLEX'] = find_between(line, 'GB-FLEX=', ',')
                     bsc_info['LAI'] = lai_bsc_dict.get(bsc_info['BSC Name'])
                     nsei_counter = 0
-                    for line0 in line_collection[count_line + 2:]:
+                    for line0 in line_collection[count_line + 1:]:
                         if line0.startswith('ADD NSE'):
                             if bsc_info['BSC Name'] == extract_bsc_name_due_to_dumbness(
                                     find_between(line0, 'OTHERNODE="', '",')):
@@ -519,7 +519,7 @@ def create_gb_iu_planning(base_folder, user_name, usn_data, rnc_data, bsc_data, 
         else:
 
             if not counter % 2:
-                esu_subrack = esu_subrack[1:]  # Caso o contador seja impart, começar pelo subrack 1
+                esu_subrack = esu_subrack[1:]  # Caso o contador seja impar, começar pelo subrack 1
 
             if new_usn:
                 if bsc_data[counter].get('GB-FLEX') == 'YES':
