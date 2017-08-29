@@ -170,7 +170,7 @@ def main():
             else:
                 print(u"Sorry, we don't understand ['{}'], please try again.".format(expansion))
                 continue
-            # Check if rnc_name has any value, if it has, split those values in a list
+            # Check if bsc_name has any value, if it has, split those values in a list
             if bsc_name:
                 bsc_name = bsc_name.split(',')
 
@@ -218,9 +218,9 @@ def main():
                         fallback_empty_row = 15
                         workbook_destination_path = create_bsc_workbook(bsc_info, destination_folder)
                         if workbook_destination_path:
-                            srvcc_entries = srvcc_dns_entries_f5(ne_info=bsc_info, expansion=expansion)
-                            export_f5_entries(ne_info=bsc_info, full_path=destination_folder,
-                                              entries_list=srvcc_entries)
+                            #                            srvcc_entries = srvcc_dns_entries_f5(ne_info=bsc_info, expansion=expansion)
+                            #                            export_f5_entries(ne_info=bsc_info, full_path=destination_folder,
+                            #                                              entries_list=srvcc_entries)
                             fallback_empty_row, dns_sheet_empty_row, fallback_dns_sheet_empty_row = create_bsc_project(
                                 workbook_destination_path=workbook_destination_path,
                                 user_name=user_name,
@@ -463,7 +463,7 @@ def extract_bsc_info_for_project(gb_iu_planning_input, bsc_name):
     }
     bsc_info = dict()
     if not bsc_name:
-        for cell in merged[18:]:
+        for cell in merged[15:]:
             cell_first_index = find_between(cell, '', ':')
             int_cell_first_index = int(re.findall(digit_pattern, cell_first_index)[0])
             cell_last_index = find_between(cell, ':', '')
@@ -472,15 +472,6 @@ def extract_bsc_info_for_project(gb_iu_planning_input, bsc_name):
 
             if cell_header.get(counter % 6) == 'BSC Name':
                 bsc_info['Coordinate'] = (str(int_cell_first_index), str(int_cell_last_index))
-                lai_list = list()
-                for lai_count in xrange(int_cell_first_index, int_cell_last_index + 1):
-                    lac_cell = str(gbo_ip['E{}'.format(lai_count)].value)
-                    rac_cell = str(gbo_ip['F{}'.format(lai_count)].value) if gbo_ip[
-                        'F{}'.format(lai_count)].value else '0'
-                    if lac_cell != 'None':
-                        lai_list.append({'LAC': lac_cell, 'RAC': rac_cell})
-
-                bsc_info['LAI'] = lai_list
                 nsei_list = list()
                 for nsei_count in xrange(int_cell_first_index, int_cell_last_index + 1):
                     nsei = str(gbo_ip['C{}'.format(nsei_count)].value)
@@ -490,11 +481,11 @@ def extract_bsc_info_for_project(gb_iu_planning_input, bsc_name):
                 bsc_info['NSEI'] = nsei_list
                 gblocalend_list = list()
                 for gblocalend_count in xrange(int_cell_first_index, int_cell_last_index + 1):
-                    srn = str(gbo_ip['L{}'.format(gblocalend_count)].value)
-                    sn = str(gbo_ip['M{}'.format(gblocalend_count)].value)
-                    sgsn_ip1 = str(gbo_ip['N{}'.format(gblocalend_count)].value)
-                    sgsn_ip2 = str(gbo_ip['O{}'.format(gblocalend_count)].value)
-                    sgsn_port = str(gbo_ip['P{}'.format(gblocalend_count)].value)
+                    srn = str(gbo_ip['H{}'.format(gblocalend_count)].value)
+                    sn = str(gbo_ip['I{}'.format(gblocalend_count)].value)
+                    sgsn_ip1 = str(gbo_ip['J{}'.format(gblocalend_count)].value)
+                    sgsn_ip2 = str(gbo_ip['K{}'.format(gblocalend_count)].value)
+                    sgsn_port = str(gbo_ip['L{}'.format(gblocalend_count)].value)
                     if sgsn_ip1 != 'None':
                         gblocalend_list.append(
                             {'SRN': srn, 'SN': sn, 'LOCALIP1': sgsn_ip1, 'LOCALIP2': sgsn_ip2, 'LOCALPORT': sgsn_port}
@@ -514,7 +505,7 @@ def extract_bsc_info_for_project(gb_iu_planning_input, bsc_name):
                 counter += 1
     else:
         for bsc in bsc_name:
-            for cell in merged[18:]:
+            for cell in merged[15:]:
                 cell_first_index = find_between(cell, '', ':')
                 int_cell_first_index = int(re.findall(digit_pattern, cell_first_index)[0])
                 cell_last_index = find_between(cell, ':', '')
@@ -523,15 +514,6 @@ def extract_bsc_info_for_project(gb_iu_planning_input, bsc_name):
 
                 if cell_header.get(counter % 6) == 'BSC Name':
                     bsc_info['Coordinate'] = (str(int_cell_first_index), str(int_cell_last_index))
-                    lai_list = list()
-                    for lai_count in xrange(int_cell_first_index, int_cell_last_index + 1):
-                        lac_cell = str(gbo_ip['E{}'.format(lai_count)].value)
-                        rac_cell = str(gbo_ip['F{}'.format(lai_count)].value) if gbo_ip[
-                            'F{}'.format(lai_count)].value else '0'
-                        if lac_cell != 'None':
-                            lai_list.append({'LAC': lac_cell, 'RAC': rac_cell})
-
-                    bsc_info['LAI'] = lai_list
                     nsei_list = list()
                     for nsei_count in xrange(int_cell_first_index, int_cell_last_index + 1):
                         nsei = str(gbo_ip['C{}'.format(nsei_count)].value)
@@ -541,11 +523,11 @@ def extract_bsc_info_for_project(gb_iu_planning_input, bsc_name):
                     bsc_info['NSEI'] = nsei_list
                     gblocalend_list = list()
                     for gblocalend_count in xrange(int_cell_first_index, int_cell_last_index + 1):
-                        srn = str(gbo_ip['L{}'.format(gblocalend_count)].value)
-                        sn = str(gbo_ip['M{}'.format(gblocalend_count)].value)
-                        sgsn_ip1 = str(gbo_ip['N{}'.format(gblocalend_count)].value)
-                        sgsn_ip2 = str(gbo_ip['O{}'.format(gblocalend_count)].value)
-                        sgsn_port = str(gbo_ip['P{}'.format(gblocalend_count)].value)
+                        srn = str(gbo_ip['H{}'.format(gblocalend_count)].value)
+                        sn = str(gbo_ip['I{}'.format(gblocalend_count)].value)
+                        sgsn_ip1 = str(gbo_ip['J{}'.format(gblocalend_count)].value)
+                        sgsn_ip2 = str(gbo_ip['K{}'.format(gblocalend_count)].value)
+                        sgsn_port = str(gbo_ip['L{}'.format(gblocalend_count)].value)
                         if sgsn_ip1 != 'None':
                             gblocalend_list.append(
                                 {'SRN': srn, 'SN': sn, 'LOCALIP1': sgsn_ip1, 'LOCALIP2': sgsn_ip2,
@@ -1011,19 +993,19 @@ def create_bsc_project(workbook_destination_path, user_name, bsc_data, file_inpu
     merged = sorted(merged, key=lambda x: bydigit(x))  # Ordernar a lista com base nas linhas
 
     # Copiar os cabeçalhos do Gb_Iu_Planning para a nova aba do novo Workbook
-    for rrow in ws_from.iter_rows('A1:Q3'):
+    for rrow in ws_from.iter_rows('A1:M3'):
         for cell in rrow:
             ws_to[cell.coordinate].value = cell.value
             ws_to[cell.coordinate].style = cell.style
 
     # Mesclar as células do cabeçalho
-    for merged_cells in merged[:18]:
+    for merged_cells in merged[:15]:
         ws_to.merge_cells(merged_cells)
 
     # Copiar as células com informações da BSC alvo para a nova aba do novo Workbook
     row_count = 0
     for rrow in ws_from.iter_rows(
-            'A{}:Q{}'.format(bsc_data.get('Coordinate')[0], bsc_data.get('Coordinate')[1])):
+            'A{}:M{}'.format(bsc_data.get('Coordinate')[0], bsc_data.get('Coordinate')[1])):
         for cell in rrow:
             ranges = re.findall(digit_pattern, cell.coordinate)  # Encontrar as linhas correspondentes das celulas
 
@@ -1058,11 +1040,7 @@ def create_bsc_project(workbook_destination_path, user_name, bsc_data, file_inpu
 
     fulfill_cover_info(workbook, 'Projeto Integração BSC - {}'.format(bsc_data.get('BSC Name')), user_name)
     fallback_empty_row = fulfill_bsc_info(ws_to, ws_to_fallback, bsc_data, fallback_empty_row)
-    if sgsn_bsc_count == 1:
-        dns_sheet_empty_row, fallback_dns_sheet_empty_row = fulfill_dns_info(workbook, bsc_data,
-                                                                             dns_sheet_empty_row,
-                                                                             fallback_dns_sheet_empty_row,
-                                                                             expansion)
+
     # Salvar o novo Workbook
     workbook.save(filename=workbook_destination_path)
 
@@ -1083,7 +1061,7 @@ def fulfill_bsc_info(bsc_worksheet, fallback, bsc_info, fallback_empty_row):
     bsc_worksheet['A{}'.format(empty_row)] = 'USE ME:MEID = 8;'
 
     empty_row = bsc_worksheet.max_row + 2
-    bsc_worksheet['A{}'.format(empty_row)] = '/* 1 - Add an destination NSEID */'
+    bsc_worksheet['A{}'.format(empty_row)] = '/* 1 - Add a destination NSEID */'
     bsc_worksheet['A{}'.format(empty_row)].font = font
     empty_row = bsc_worksheet.max_row + 1
     nsei_count = len(bsc_info.get('NSEI'))
@@ -1100,17 +1078,20 @@ def fulfill_bsc_info(bsc_worksheet, fallback, bsc_info, fallback_empty_row):
     empty_row = bsc_worksheet.max_row + 2
     bsc_worksheet['A{}'.format(empty_row)] = '/* 2 - Add local link NSEID with local IP address */'
     bsc_worksheet['A{}'.format(empty_row)].font = font
-    empty_row = bsc_worksheet.max_row + 1
-    for x in xrange(nsei_count):
+    localendpoint_count = len(bsc_info.get('GBLOCALENDPOINT'))
+    for x in xrange(localendpoint_count):
+        empty_row = bsc_worksheet.max_row + 1 if x == 0 else bsc_worksheet.max_row
         bsc_worksheet['A{}'.format(empty_row + x)] = add_gbiplocendpt.format(nsei=bsc_info.get('NSEI')[x],
                                                                              srn=bsc_info.get(
                                                                                  'GBLOCALENDPOINT')[x].get('SRN'),
                                                                              sn=bsc_info.get(
                                                                                  'GBLOCALENDPOINT')[x].get('SN'),
                                                                              LIPV4=bsc_info.get(
-                                                                                 'GBLOCALENDPOINT')[x].get('LOCALIP1'),
+                                                                                 'GBLOCALENDPOINT')[x].get(
+                                                                                 'LOCALIP1'),
                                                                              LOCALPORT=bsc_info.get(
-                                                                                 'GBLOCALENDPOINT')[x].get('LOCALPORT'),
+                                                                                 'GBLOCALENDPOINT')[x].get(
+                                                                                 'LOCALPORT'),
                                                                              BSC_Name=bsc_info.get('BSC Name'))
 
         bsc_worksheet['A{}'.format(empty_row + x + 1)] = add_gbiplocendpt.format(nsei=bsc_info.get('NSEI')[x],

@@ -65,21 +65,15 @@ bsc_column_id = {
     'TX': 'B',
     'NSEI': 'C',
     'BSSID': 'D',
-    'LAC': 'E',
-    'RAC': 'F',
-    'NSE Conf Type': 'G',
-    'Remote IP Address': 'H',
-    'Remote Port': 'I',
-    'SGSN Name': 'J',
-    'NRI': 'K',
-    'Subrack No': 'L',
-    'Slot No': 'M',
-    'Local IP Address 1': 'N',
-    'Local IP Address 2': 'O',
-    'Local Port': 'P',
-    'GB-FLEX': 'Q'
-
-}
+    'NSE Conf Type': 'E',
+    'SGSN Name': 'F',
+    'NRI': 'G',
+    'Subrack No': 'H',
+    'Slot No': 'I',
+    'Local IP Address 1': 'J',
+    'Local IP Address 2': 'K',
+    'Local Port': 'L',
+    'GB-FLEX': 'M'}
 
 
 def main():
@@ -93,7 +87,6 @@ def main():
         choice = raw_input('> ').strip()
         if choice == '1':
             legacy_usn = raw_input(u'Type in the path to the legacy USN export file: ').strip()
-            lai_bsc_info = raw_input(u'Type in the path to the Excel file with BSC-LAC-RAC info: ').strip()
             base_folder = os.path.abspath(os.getcwd())
             destination_folder = 'Gb_Iu_Planning'
             full_path = os.path.join(base_folder, destination_folder)
@@ -101,7 +94,7 @@ def main():
                 os.makedirs(full_path)
             legacy_usn_data = extract_usn_info(legacy_usn)
             all_rnc_data = extract_rnc_info(legacy_usn)
-            bsc_data = extract_bsc_info(lai_bsc_info, legacy_usn)
+            bsc_data = extract_bsc_info(legacy_usn)
             create_gb_iu_planning(full_path, user_name, legacy_usn_data, all_rnc_data, bsc_data)
             print('**************************')
             print('* Gb Iu Planning Created *')
@@ -109,7 +102,6 @@ def main():
         elif choice == '2':
             legacy_usn = raw_input(u'Type in the path to the legacy USN export file: ').strip()
             new_usn = raw_input(u'Type in the path to the new USN export file: ').strip()
-            lai_bsc_info = raw_input(u'Type in the path to the Excel file with BSC-LAC-RAC info: ').strip()
             base_folder = os.path.abspath(os.getcwd())
             destination_folder = 'Gb_Iu_Planning'
             full_path = os.path.join(base_folder, destination_folder)
@@ -118,7 +110,7 @@ def main():
             legacy_usn_data = extract_usn_info(legacy_usn)
             new_usn_data = extract_usn_info(new_usn)
             all_rnc_data = extract_rnc_info(legacy_usn)
-            bsc_data = extract_bsc_info(lai_bsc_info, legacy_usn)
+            bsc_data = extract_bsc_info(legacy_usn)
             create_gb_iu_planning(full_path, user_name, new_usn_data, all_rnc_data, bsc_data, new_usn=True,
                                   legacy_usn_data=legacy_usn_data)
             print('**************************')
@@ -248,9 +240,17 @@ def extract_rnc_info(file_input):
     return all_rnc_data
 
 
-def extract_bsc_info(lai_bsc_file, file_input):
-    temp_csv = export_excel_to_csv(lai_bsc_file)
-    bsc_lai = export_csv_to_dict_list(temp_csv, ['RAC', 'LAC', 'BSC'])
+def extract_bsc_info(file_input):
+
+    def populate_local_endpoint(bsc_info, gblocalendpoint_list):
+        nsei_count = len(bsc_info.get('NSE'))
+        local_endpoint = list()
+        for x in xrange(nsei_count):
+            for nsei_dict in gblocalendpoint_list:
+                endpoint = nsei_dict.get(bsc_info.get('NSE')[x].get('NSEI'))
+                if endpoint:
+                    local_endpoint.append(endpoint)
+        return local_endpoint
 
     def extract_gplocalendpoint_info():
         gplocalendpoint = list()
@@ -269,20 +269,6 @@ def extract_bsc_info(lai_bsc_file, file_input):
 
     gblocalendpoint_list = extract_gplocalendpoint_info()
 
-    def create_bsc_lai_dict(bsc_lai_list):
-        lai_bsc = dict()
-        new_list = list()
-        for dicts in bsc_lai_list:
-            bsc_name = dicts.get('BSC')
-            for dicts1 in bsc_lai_list:
-                if bsc_name == dicts1.get('BSC'):
-                    new_list.append({'LAC': dicts1.get('LAC'),
-                                     'RAC': dicts1.get('RAC')})
-                    lai_bsc[bsc_name] = new_list
-            new_list = list()
-        return lai_bsc
-
-    lai_bsc_dict = create_bsc_lai_dict(bsc_lai)
     all_bsc_data = list()
 
     fin = open(file_input)
@@ -292,8 +278,6 @@ def extract_bsc_info(lai_bsc_file, file_input):
     for line in line_collection:
 
         bsc_info = dict()
-        local_endpoint = list()
-        remote_endpoint = list()
         nse = list()
         line = line.strip()
         count = len(all_bsc_data) - 1
@@ -312,7 +296,6 @@ def extract_bsc_info(lai_bsc_file, file_input):
                 bsc_info['BT'] = find_between(line, 'BT=', ',')
                 bsc_info['CT'] = find_between(line, 'CT=', ',')
                 bsc_info['GB-FLEX'] = find_between(line, 'GB-FLEX=', ',')
-                bsc_info['LAI'] = lai_bsc_dict.get(bsc_info['BSC Name'])
                 for line0 in line_collection[count_line + 1:]:
                     if line0.startswith('ADD NSE'):
                         if bsc_info['BSC Name'] == extract_bsc_name_due_to_dumbness(
@@ -325,27 +308,7 @@ def extract_bsc_info(lai_bsc_file, file_input):
                                  }
                             )
                         bsc_info['NSE'] = nse
-                    elif line0.startswith('ADD GBIPLOCENDPT'):
-                        if find_between(line0, 'NSEI=', ',') == bsc_info.get('NSE')[0].get(
-                                'NSEI'):
-                            local_endpoint.append(
-                                {'SN': find_between(line0, 'SN=', ','),
-                                 'SRN': find_between(line0, 'SRN=', ','),
-                                 'LIPV4': find_between(line0, 'LIPV4="', '",'),
-                                 'LUP': find_between(line0, 'LUP=', ',')
-                                 }
-                            )
-                        bsc_info['GBIPLOCENDPT'] = local_endpoint
-                    if bsc_info.get('CT') == 'STATIC':
-                        if line0.startswith('ADD GBIPRMTENDPT'):
-                            if find_between(line0, 'NSEI=', ';'):
-                                remote_endpoint.append(
-                                    {
-                                        'RIPV4': find_between(line0, 'RIPV4="', '",'),
-                                        'RUP': find_between(line0, 'RUP=', ',')
-                                    }
-                                )
-                            bsc_info['GBIPRMTENDPT'] = remote_endpoint
+
             else:
                 if not all_bsc_data[count].get('BSC Name') == extract_bsc_name_due_to_dumbness(find_between(
                         line, 'OTHERNODE="', '",')):
@@ -363,7 +326,6 @@ def extract_bsc_info(lai_bsc_file, file_input):
                     bsc_info['BT'] = find_between(line, 'BT=', ',')
                     bsc_info['CT'] = find_between(line, 'CT=', ',')
                     bsc_info['GB-FLEX'] = find_between(line, 'GB-FLEX=', ',')
-                    bsc_info['LAI'] = lai_bsc_dict.get(bsc_info['BSC Name'])
                     nsei_counter = 0
                     for line0 in line_collection[count_line + 1:]:
                         if line0.startswith('ADD NSE'):
@@ -379,29 +341,8 @@ def extract_bsc_info(lai_bsc_file, file_input):
                                 nsei_counter += 1
                             bsc_info['NSE'] = nse
 
-                        elif line0.startswith('ADD GBIPLOCENDPT'):
-                            if find_between(line0, 'NSEI=', ',') == bsc_info.get('NSE')[nsei_counter].get(
-                                    'NSEI'):
-                                local_endpoint.append(
-                                    {'SN': find_between(line0, 'SN=', ','),
-                                     'SRN': find_between(line0, 'SRN=', ','),
-                                     'LIPV4': find_between(line0, 'LIPV4="', '",'),
-                                     'LUP': find_between(line0, 'LUP=', ',')
-                                     }
-                                )
-                            bsc_info['GBIPLOCENDPT'] = local_endpoint
-                        if bsc_info.get('CT') == 'STATIC':
-                            if line0.startswith('ADD GBIPRMTENDPT'):
-                                if find_between(line0, 'NSEI=', ';'):
-                                    remote_endpoint.append(
-                                        {
-                                            'RIPV4': find_between(line0, 'RIPV4="', '",'),
-                                            'RUP': find_between(line0, 'RUP=', ',')
-                                        }
-                                    )
-                                bsc_info['GBIPRMTENDPT'] = remote_endpoint
-
         if bsc_info:
+            bsc_info['GBLOCALENDPOINT'] = populate_local_endpoint(bsc_info, gblocalendpoint_list)
             all_bsc_data.append(bsc_info)
         count_line += 1
     all_bsc_data = sorted(all_bsc_data, key=lambda k: k['BSC Name'])
@@ -486,17 +427,11 @@ def create_gb_iu_planning(base_folder, user_name, usn_data, rnc_data, bsc_data, 
     # Aba GBoIP
     gbo_ip = active_workbook.get_sheet_by_name('GBoIP')
     for counter in xrange(len(bsc_data)):
-        if bsc_data[counter].get('CT') == 'STATIC':
-            try:
-                temp_max = max(len(bsc_data[counter].get('NSE')), len(bsc_data[counter].get('LAI')))
-            except TypeError:
-                temp_max = len(bsc_data[counter].get('NSE'))
-            rows_num = max(temp_max, len(bsc_data[counter].get('GBIPRMTENDPT')))
-        else:
-            try:
-                rows_num = max(len(bsc_data[counter].get('NSE')), len(bsc_data[counter].get('LAI')))
-            except TypeError:
-                rows_num = len(bsc_data[counter].get('NSE'))
+        try:
+            rows_num = len(bsc_data[counter].get('NSE'))
+        except TypeError:
+            rows_num = len(bsc_data[counter].get('NSE'))
+
         if counter == 0:
 
             if new_usn:
@@ -763,10 +698,10 @@ def populate_gboip_sheet_with_bsc_info(gbo_ip, empty_row, end_row, bsc_data, cou
     # TODO Implement a better way to handle information from GBLOCALENDPOINT
     gbo_ip.merge_cells(start_row=empty_row, start_column=1, end_row=end_row, end_column=1)
     gbo_ip.merge_cells(start_row=empty_row, start_column=2, end_row=end_row, end_column=2)
+    gbo_ip.merge_cells(start_row=empty_row, start_column=5, end_row=end_row, end_column=5)
+    gbo_ip.merge_cells(start_row=empty_row, start_column=6, end_row=end_row, end_column=6)
     gbo_ip.merge_cells(start_row=empty_row, start_column=7, end_row=end_row, end_column=7)
-    gbo_ip.merge_cells(start_row=empty_row, start_column=10, end_row=end_row, end_column=10)
-    gbo_ip.merge_cells(start_row=empty_row, start_column=11, end_row=end_row, end_column=11)
-    gbo_ip.merge_cells(start_row=empty_row, start_column=17, end_row=end_row, end_column=17)
+    gbo_ip.merge_cells(start_row=empty_row, start_column=13, end_row=end_row, end_column=13)
     gbo_ip['{}{}'.format(bsc_column_id.get('BSC Name'), empty_row)] = bsc_data[counter].get('BSC Name')
     gbo_ip['{}{}'.format(bsc_column_id.get('TX'), empty_row)] = bsc_data[counter].get('BT')
     gbo_ip['{}{}'.format(bsc_column_id.get('NSE Conf Type'), empty_row)] = bsc_data[counter].get('CT')
@@ -782,38 +717,30 @@ def populate_gboip_sheet_with_bsc_info(gbo_ip, empty_row, end_row, bsc_data, cou
         gbo_ip['{}{}'.format(bsc_column_id.get('BSSID'), row_count)] = bsc_data[counter].get('NSE')[nsei_count].get(
             'BSSID')
         nsei_count += 1
-    max_local_endpoint = len(bsc_data[counter].get('GBIPLOCENDPT'))
+    max_local_endpoint = len(bsc_data[counter].get('GBLOCALENDPOINT'))
     row_count_real = empty_row
     for row_count in xrange(empty_row, empty_row + max_local_endpoint):
         if not local_endpoint_count % 2:
             gbo_ip['{}{}'.format(bsc_column_id.get('Subrack No'), row_count_real)] = bsc_data[counter].get(
-                'GBIPLOCENDPT')[local_endpoint_count].get(
+                'GBLOCALENDPOINT')[local_endpoint_count].get(
                 'SRN')
             gbo_ip['{}{}'.format(bsc_column_id.get('Slot No'), row_count_real)] = bsc_data[counter].get(
-                'GBIPLOCENDPT')[local_endpoint_count].get(
+                'GBLOCALENDPOINT')[local_endpoint_count].get(
                 'SN')
 
             gbo_ip['{}{}'.format(bsc_column_id.get('Local IP Address 1'), row_count_real)] = bsc_data[counter].get(
-                'GBIPLOCENDPT')[local_endpoint_count].get(
+                'GBLOCALENDPOINT')[local_endpoint_count].get(
                 'LIPV4')
             gbo_ip['{}{}'.format(bsc_column_id.get('Local Port'), row_count_real)] = bsc_data[counter].get(
-                'GBIPLOCENDPT')[local_endpoint_count].get(
+                'GBLOCALENDPOINT')[local_endpoint_count].get(
                 'LUP')
             row_count_real += 1
         else:
             gbo_ip['{}{}'.format(bsc_column_id.get('Local IP Address 2'), row_count_real - 1)] = bsc_data[counter].get(
-                'GBIPLOCENDPT')[local_endpoint_count].get(
+                'GBLOCALENDPOINT')[local_endpoint_count].get(
                 'LIPV4')
         local_endpoint_count += 1
-    if bsc_data[counter].get('LAI'):
-        max_lai = len(bsc_data[counter].get('LAI'))
-        lai_count = 0
-        for row_count in xrange(empty_row, empty_row + max_lai):
-            gbo_ip['{}{}'.format(bsc_column_id.get('LAC'), row_count)] = bsc_data[counter].get('LAI')[lai_count].get(
-                'LAC')
-            gbo_ip['{}{}'.format(bsc_column_id.get('RAC'), row_count)] = bsc_data[counter].get('LAI')[lai_count].get(
-                'RAC')
-            lai_count += 1
+
 
 
 def populate_gboip_sheet_with_usn_info(gbo_ip, empty_row, end_row, bsc_data, counter, usn_data, esu_subrack,
@@ -822,10 +749,10 @@ def populate_gboip_sheet_with_usn_info(gbo_ip, empty_row, end_row, bsc_data, cou
     global slot_count_1
     gbo_ip.merge_cells(start_row=empty_row, start_column=1, end_row=end_row, end_column=1)
     gbo_ip.merge_cells(start_row=empty_row, start_column=2, end_row=end_row, end_column=2)
+    gbo_ip.merge_cells(start_row=empty_row, start_column=5, end_row=end_row, end_column=5)
+    gbo_ip.merge_cells(start_row=empty_row, start_column=6, end_row=end_row, end_column=6)
     gbo_ip.merge_cells(start_row=empty_row, start_column=7, end_row=end_row, end_column=7)
-    gbo_ip.merge_cells(start_row=empty_row, start_column=10, end_row=end_row, end_column=10)
-    gbo_ip.merge_cells(start_row=empty_row, start_column=11, end_row=end_row, end_column=11)
-    gbo_ip.merge_cells(start_row=empty_row, start_column=17, end_row=end_row, end_column=17)
+    gbo_ip.merge_cells(start_row=empty_row, start_column=13, end_row=end_row, end_column=13)
     gbo_ip['{}{}'.format(bsc_column_id.get('BSC Name'), empty_row)] = bsc_data[counter].get('BSC Name')
     gbo_ip['{}{}'.format(bsc_column_id.get('TX'), empty_row)] = bsc_data[counter].get('BT')
     gbo_ip['{}{}'.format(bsc_column_id.get('NSE Conf Type'), empty_row)] = bsc_data[counter].get('CT')
@@ -872,15 +799,7 @@ def populate_gboip_sheet_with_usn_info(gbo_ip, empty_row, end_row, bsc_data, cou
         row_count_real += 1
         port_number += 5
         nsei_count += 1
-    if bsc_data[counter].get('LAI'):
-        max_lai = len(bsc_data[counter].get('LAI'))
-        lai_count = 0
-        for row_count in xrange(empty_row, empty_row + max_lai):
-            gbo_ip['{}{}'.format(bsc_column_id.get('LAC'), row_count)] = bsc_data[counter].get('LAI')[lai_count].get(
-                'LAC')
-            gbo_ip['{}{}'.format(bsc_column_id.get('RAC'), row_count)] = bsc_data[counter].get('LAI')[lai_count].get(
-                'RAC')
-            lai_count += 1
+
     return port_number
 
 
