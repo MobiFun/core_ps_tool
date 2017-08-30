@@ -86,19 +86,21 @@ def main():
         print(u'3: Exit')
         choice = raw_input('> ').strip()
         if choice == '1':
-            legacy_usn = raw_input(u'Type in the path to the legacy USN export file: ').strip()
+            legacy_usn_list = raw_input(u'Type in the path(s) to USN export file(s) '
+                                        u'separate paths by ";": ').strip().split(';')
             base_folder = os.path.abspath(os.getcwd())
             destination_folder = 'Gb_Iu_Planning'
             full_path = os.path.join(base_folder, destination_folder)
             if not os.path.exists(full_path):
                 os.makedirs(full_path)
-            legacy_usn_data = extract_usn_info(legacy_usn)
-            all_rnc_data = extract_rnc_info(legacy_usn)
-            bsc_data = extract_bsc_info(legacy_usn)
-            create_gb_iu_planning(full_path, user_name, legacy_usn_data, all_rnc_data, bsc_data)
-            print('**************************')
-            print('* Gb Iu Planning Created *')
-            print('**************************')
+            for legacy_usn in legacy_usn_list:
+                legacy_usn_data = extract_usn_info(legacy_usn)
+                all_rnc_data = extract_rnc_info(legacy_usn)
+                bsc_data = extract_bsc_info(legacy_usn)
+                create_gb_iu_planning(full_path, user_name, legacy_usn_data, all_rnc_data, bsc_data)
+                print('***************************{}'.format('*'*len(legacy_usn_data.get('USN'))))
+                print('* {} Gb Iu Planning Created *'.format(legacy_usn_data.get('USN')))
+                print('***************************{}'.format('*'*len(legacy_usn_data.get('USN'))))
         elif choice == '2':
             legacy_usn = raw_input(u'Type in the path to the legacy USN export file: ').strip()
             new_usn = raw_input(u'Type in the path to the new USN export file: ').strip()
@@ -241,7 +243,6 @@ def extract_rnc_info(file_input):
 
 
 def extract_bsc_info(file_input):
-
     def populate_local_endpoint(bsc_info, gblocalendpoint_list):
         nsei_count = len(bsc_info.get('NSE'))
         local_endpoint = list()
@@ -485,7 +486,7 @@ def create_gb_iu_planning(base_folder, user_name, usn_data, rnc_data, bsc_data, 
                 active_cell_sec.border = border
 
     # Format every used cell on GBoIP sheet
-    for letras in alphabet[:17]:
+    for letras in alphabet[:13]:
         for i in xrange(1, end_row_gb + 1):
             active_cell = gbo_ip[letras + str(i)]
             active_cell.alignment = alignment
@@ -695,7 +696,6 @@ def populate_iuc_sheet_with_usn_info(iu_c, empty_row, end_row, rnc_data, counter
 
 
 def populate_gboip_sheet_with_bsc_info(gbo_ip, empty_row, end_row, bsc_data, counter, usn_data):
-    # TODO Implement a better way to handle information from GBLOCALENDPOINT
     gbo_ip.merge_cells(start_row=empty_row, start_column=1, end_row=end_row, end_column=1)
     gbo_ip.merge_cells(start_row=empty_row, start_column=2, end_row=end_row, end_column=2)
     gbo_ip.merge_cells(start_row=empty_row, start_column=5, end_row=end_row, end_column=5)
@@ -740,7 +740,6 @@ def populate_gboip_sheet_with_bsc_info(gbo_ip, empty_row, end_row, bsc_data, cou
                 'GBLOCALENDPOINT')[local_endpoint_count].get(
                 'LIPV4')
         local_endpoint_count += 1
-
 
 
 def populate_gboip_sheet_with_usn_info(gbo_ip, empty_row, end_row, bsc_data, counter, usn_data, esu_subrack,
