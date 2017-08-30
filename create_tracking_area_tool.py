@@ -170,7 +170,7 @@ def main_create_tracking_area_tool():
             counter_workbook += 1
 
             yes_or_no = raw_input('Voce deseja criar mais projetos de TAC;LAC? (S ou N) : ')
-            if yes_or_no == 'S' or yes_or_no == 's':
+            if yes_or_no.lower() == 's':
 
                 # reload(ericsson)
                 reload(huawei)
@@ -178,7 +178,7 @@ def main_create_tracking_area_tool():
 
                 continue
 
-            elif yes_or_no == 'N' or yes_or_no == 'n':
+            elif yes_or_no.lower() == 'n':
                 break
 
 

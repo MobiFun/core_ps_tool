@@ -1080,7 +1080,7 @@ def fulfill_bsc_info(bsc_worksheet, fallback, bsc_info, fallback_empty_row):
     bsc_worksheet['A{}'.format(empty_row)].font = font
     localendpoint_count = len(bsc_info.get('GBLOCALENDPOINT'))
     for x in xrange(localendpoint_count):
-        empty_row = bsc_worksheet.max_row + 1 if x == 0 else bsc_worksheet.max_row
+        empty_row = bsc_worksheet.max_row + 1 # if x == 0 else bsc_worksheet.max_row
         bsc_worksheet['A{}'.format(empty_row + x)] = add_gbiplocendpt.format(nsei=bsc_info.get('NSEI')[x],
                                                                              srn=bsc_info.get(
                                                                                  'GBLOCALENDPOINT')[x].get('SRN'),

@@ -12,7 +12,6 @@ warnings.filterwarnings("ignore")
 slot_count_0 = 0
 slot_count_1 = 0
 
-# TODO implement OrderedDict to try to solve NSEI and Local IPs relations in excel (populate_gbplanning_with_bsc_info)
 alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
             'U', 'V', 'W', 'X', 'Y', 'Z']
 rnc_column_id = {
@@ -73,7 +72,8 @@ bsc_column_id = {
     'Local IP Address 1': 'J',
     'Local IP Address 2': 'K',
     'Local Port': 'L',
-    'GB-FLEX': 'M'}
+    'GB-FLEX': 'M'
+}
 
 
 def main():
@@ -115,9 +115,9 @@ def main():
             bsc_data = extract_bsc_info(legacy_usn)
             create_gb_iu_planning(full_path, user_name, new_usn_data, all_rnc_data, bsc_data, new_usn=True,
                                   legacy_usn_data=legacy_usn_data)
-            print('**************************')
-            print('* Gb Iu Planning Created *')
-            print('**************************')
+            print('***************************{}'.format('*' * len(new_usn_data.get('USN'))))
+            print('* {} Gb Iu Planning Created *'.format(new_usn_data.get('USN')))
+            print('***************************{}'.format('*' * len(new_usn_data.get('USN'))))
         elif choice == '3':
             print(u'Thank you for using the Gb Iu Planning creation Tool!')
             print(u'If you have any suggestions please send an e-mail to: decastromonteiro@gmail.com')
