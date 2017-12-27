@@ -1,8 +1,8 @@
 # coding=utf-8
 #####################################################
-#                    Versao 4.1                     #
+#                    Versao 4.2                     #
 #                                                   #
-#                 Data 30-01-2017                   #
+#                 Data 27-12-2017                   #
 #                                                   #
 #            Autor: Leonardo Monteiro               #
 #      E-mail: decastromonteiro@gmail.com           #
@@ -21,11 +21,17 @@ import datetime
 import re
 from collections import namedtuple
 import os
+import argparse
 
 # Patterns to Search for DNS Domains, DNS Zones, and to convert a LIST String to a concatenation of elements
 domain_pattern = ".+?(?=\.epc)|.+?(?=\.mnc)"
 zone_pattern = "\mnc.+|epc.+"
 list_to_string_pattern = r"\'|\,|\[|\]|"
+parser = argparse.ArgumentParser()
+parser.add_argument("-i", "--ip", help="IP Address of F5 BIG-IP Platform", type=str)
+parser.add_argument("-u", "--user", help="Username to access F5 BIG-IP Platform", type=str)
+parser.add_argument("-p", "--password", help="Password to access F5 BIG-IP Platform", type=str)
+args = parser.parse_args()
 
 
 def flush_dns_configuration(b, view_name, naptr_records, naptr_records_delete, a_records, a_records_delete):
@@ -323,10 +329,13 @@ def main_cvna_f5_app_main():
     print("\nBem vindo a ferramenta de CVNA do BIG-IP F5\n")
     _status = "NOK"
     while _status != "OK":
-        print("Por favor, insira as infos abaixo para obter acesso ao BIG-IP:\n")
-        hostname = raw_input("Digite o IP do Big-IP: ")
-        username = raw_input("Usuario: ")
-        password = getpass.getpass('Senha: ')
+        if not args.ip or not args.user or not args.password:
+            print("Por favor, insira as infos abaixo para obter acesso ao BIG-IP:\n")
+
+        hostname = args.ip if args.ip else raw_input("Digite o IP do Big-IP: ")
+        username = args.user if args.user else raw_input("Usuario: ")
+        password = args.password if args.password else getpass.getpass('Senha: ')
+        print('Tentanto conexao com o BIG-IP F5...')
         b = bigsuds.BIGIP(
 
             hostname=hostname.strip(),
@@ -342,15 +351,21 @@ def main_cvna_f5_app_main():
             _status = "OK"
         except bigsuds.ConnectionError as error:
             if "HTTP Error 401:" in error.message:
+                args.user = None
+                args.password = None
                 print("\n\nUsuario ou Senha errados, por favor verifique e tente novamente."
                       "\n\nPressione <Enter> para sair.")
                 raw_input()
             else:
                 # noinspection PyProtectedMember
+                args.ip = None
                 print("\n\nUma tentativa de conexao com o BIG-IP: [{}] falhou. Verifique o IP e tente novamente."
                       "\n\nPressione <Enter> para sair.".format(b._hostname))
                 raw_input()
         except Exception as error:
+            args.ip = None
+            args.user = None
+            args.password = None
             print("Encontramos um erro. Reporte-o ao desenvolvedor (decastromonteiro@gmail.com).")
             print("\n\n" + error.message)
             raw_input()
