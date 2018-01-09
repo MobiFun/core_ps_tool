@@ -395,6 +395,9 @@ def main_cvna_f5_app_main():
                   )
 
             choose_action = raw_input("> ")
+        else:
+            choose_action = args.action.strip()
+
         if choose_action == "1":
             view_name = args.view.strip() if args.view else raw_input(
                 "Digite o nome da view que deseja consultar: ").strip()
