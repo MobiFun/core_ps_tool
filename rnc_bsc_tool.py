@@ -741,7 +741,7 @@ def fulfill_rnc_info(rnc_worksheet, fallback, rnc_info, fallback_empty_row):
     rnc_worksheet['A{}'.format(empty_row)] = '/* 5 - Configure the SCCP layer data */'
     rnc_worksheet['A{}'.format(empty_row)].font = font
     empty_row = rnc_worksheet.max_row + 1
-    rnc_worksheet['A{}'.format(empty_row)] = add_sccpdpc.format(DPX=rnc_info.get('RNCX'),
+    rnc_worksheet['A{}'.format(empty_row)] = add_sccpdpc.format(DPX=rnc_info.get('DPX'),
                                                                 OPX=rnc_info.get('OPX'),
                                                                 DPC=rnc_info.get('DPC'),
                                                                 RNC_Name=rnc_info.get('RNC Name'))
@@ -790,6 +790,7 @@ def fulfill_rnc_info(rnc_worksheet, fallback, rnc_info, fallback_empty_row):
                                                                    DPC=rnc_info.get('DPC'),
                                                                    Iu_Flex=rnc_info.get('Iu-Flex'),
                                                                    RanSharing=rnc_info.get('Ran Sharing'),
+                                                                   DT=rnc_info.get('DT'),
                                                                    R7_QOS=rnc_info.get('Support R7 QoS'),
                                                                    RAB_QOS=rnc_info.get('RAB QOS')
                                                                    )
@@ -830,8 +831,9 @@ def fulfill_rnc_info(rnc_worksheet, fallback, rnc_info, fallback_empty_row):
     fallback['E{}'.format(fallback_empty_row)] = 'RMV SCCPDPC: DPX={DPX};'.format(DPX=rnc_info.get('RNCX'))
     fallback_empty_row += 1
     for x in xrange(m3lnk_count):
-        fallback['E{}'.format(fallback_empty_row)] = 'RMV M3LNK: SRN={SRN}, SN={SN}, LNK={LNK};'.format(
-            SRN=rnc_info.get('M3LNK')[x].get('SRN'), SN=rnc_info.get('M3LNK')[x].get('SN'),
+        # 'RMV M3LNK: SRN={SRN}, SN={SN}, LNK={LNK};'
+        fallback['E{}'.format(fallback_empty_row)] = 'RMV M3LNK: LNK={LNK};'.format(
+            # SRN=rnc_info.get('M3LNK')[x].get('SRN'), SN=rnc_info.get('M3LNK')[x].get('SN'),
             LNK=rnc_info.get('M3LNK')[x].get('LNK')
         )
         fallback_empty_row += 1
