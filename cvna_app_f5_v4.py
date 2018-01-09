@@ -1,8 +1,8 @@
 # coding=utf-8
 #####################################################
-#                    Versao 4.2                     #
+#                    Versao 4.3                     #
 #                                                   #
-#                 Data 27-12-2017                   #
+#                 Data 09-01-2018                  #
 #                                                   #
 #            Autor: Leonardo Monteiro               #
 #      E-mail: decastromonteiro@gmail.com           #
@@ -31,6 +31,21 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--ip", help="IP Address of F5 BIG-IP Platform", type=str)
 parser.add_argument("-u", "--user", help="Username to access F5 BIG-IP Platform", type=str)
 parser.add_argument("-p", "--password", help="Password to access F5 BIG-IP Platform", type=str)
+parser.add_argument("-a", "--action",
+                    help="Choose the action to be performed by CVNA APP F5."
+                         "1: Consultar zona no DNS\n"
+                         "2: Criar/Remover Entradas no DNS\n"
+                         "3: Sair", type=str)
+parser.add_argument("-v", "--view", help="Choose the DNS view to use", type=str)
+parser.add_argument("-f", "--file", help="Input file path containing configurations", type=str)
+parser.add_argument("-z", "--zone",
+                    help="Choose the DNS zone to query.\n This option is used only when --action is 1.", type=str)
+parser.add_argument("-n", "--name", help="Input name to query.\n This option is used only when --action is 1.",
+                    type=str)
+parser.add_argument("-e", "--export",
+                    help="Choose whether to export the query to a file or not.\ns: export\n\nn: no export\n"
+                         "\nThis option is used only when --action is 1.",
+                    type=str)
 args = parser.parse_args()
 
 
@@ -349,6 +364,7 @@ def main_cvna_f5_app_main():
             system_name = b.System.Inet.get_hostname()
             print("\nConectado ao BIG-IP: {}\nVersao: {}\n\n".format(system_name, version))
             _status = "OK"
+            args.password = None
         except bigsuds.ConnectionError as error:
             if "HTTP Error 401:" in error.message:
                 args.user = None
@@ -371,18 +387,23 @@ def main_cvna_f5_app_main():
             raw_input()
 
     while True:
-        print("\nEscolha uma das opcoes abaixo para prosseguir:")
-        print("1: Consultar zona no DNS\n"
-              "2: Criar/Remover Entradas no DNS\n"
-              "3: Sair\n"
-              )
+        if not args.action:
+            print("\nEscolha uma das opcoes abaixo para prosseguir:")
+            print("1: Consultar zona no DNS\n"
+                  "2: Criar/Remover Entradas no DNS\n"
+                  "3: Sair\n"
+                  )
 
-        choose_action = raw_input("> ")
+            choose_action = raw_input("> ")
         if choose_action == "1":
-            view_name = raw_input("Digite o nome da view que deseja consultar: ").strip()
-            zone_name = raw_input("Digite o nome da zona que deseja consultar: ").strip()
-            regex = raw_input("Digite um nome especifico que deseja consultar dentro da zona: ").strip()
-            export = raw_input("Deseja exportar as respostas para um arquivo? (s\\n): ").strip()
+            view_name = args.view.strip() if args.view else raw_input(
+                "Digite o nome da view que deseja consultar: ").strip()
+            zone_name = args.zone.strip() if args.zone else raw_input(
+                "Digite o nome da zona que deseja consultar: ").strip()
+            regex = args.name.strip() if args.name else raw_input(
+                "Digite um nome especifico que deseja consultar dentro da zona: ").strip()
+            export = args.export.strip() if args.export else raw_input(
+                "Deseja exportar as respostas para um arquivo? (s\\n): ").strip()
             if export.lower() == "s":
                 print("Consultando o DNS...")
                 try:
@@ -407,9 +428,10 @@ def main_cvna_f5_app_main():
 
         elif choose_action == "2":
 
-            view_name = raw_input("Escreva o nome da view que deseja configurar: ")
-            arquivo_input = raw_input("Escreva os nomes dos arquivos de input, utilizando ponto e virgula (;) "
-                                      "como separador: ").split(";")
+            view_name = args.view.strip() if args.view else raw_input("Escreva o nome da view que deseja configurar: ")
+            arquivo_input = args.file.strip() if args.file else raw_input(
+                "Escreva os nomes dos arquivos de input, utilizando ponto e virgula (;) "
+                "como separador: ").split(";")
             try:
 
                 records = evolved_extract_records(arquivo_input)
@@ -502,6 +524,13 @@ def main_cvna_f5_app_main():
             print("Obrigado por utilizar a ferramenta de CVNA do BIG-IP F5!")
             raw_input()
             break
+
+        args.action = None
+        args.view = None
+        args.zone = None
+        args.name = None
+        args.export = None
+        args.file = None
 
 
 if __name__ == "__main__":
